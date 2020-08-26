@@ -566,7 +566,9 @@ def main():
         sys.exit(1)
 
     # Argument parser
-    parser = argparse.ArgumentParser(description="Computes the Pearson correlation coefficient between two masks (one being a seed mask and the other being a statistics mask)."
+    parser = argparse.ArgumentParser(
+        description="Computes the Pearson correlation coefficient between two masks (one being a seed mask and the other being a statistics mask). \
+                    The Pearson correlation coefficient is written to an output file ending with '.pear_corr.txt'.")
 
     # Parse Arguments
     # Required Arguments
@@ -624,7 +626,7 @@ def main():
                             required=False,
                             default=False,
                             help="Preforms dry-run (e.g. no files are created). [default: 'disabled']")
-    optoptions.add_argument('-v','--verbose',
+    optoptions.add_argument('-v', '--verbose',
                             dest="verbose",
                             action="store_true",
                             required=False,
@@ -647,8 +649,7 @@ def main():
         if err.code == 2:
             parser.print_help()
 
-
-    [corr_coeff,text_file] = corr_comp(cii=args.cii_file,
+    [corr_coeff, text_file] = corr_comp(cii=args.cii_file,
                                         seed_mask=args.seed_mask,
                                         stat_mask=args.stat_mask,
                                         out_prefix=args.out_prefix,
