@@ -11,6 +11,11 @@ import os
 import numpy as np
 import random
 import shutil
+import platform
+import sys
+
+# Import modules/packages argument parser
+import argparse
 
 # Define class(es)
 class Command(object):
@@ -532,3 +537,130 @@ def corr_comp(cii,seed_mask,stat_mask,out_prefix,thresh=0,log_file="file.log",de
     return corr_coeff,text_file
 
 # Write main function
+def main():
+    '''
+    main function
+    - Checks system platform
+    - Checks for required external software dependencies outside of python
+    - Parses arguments
+    '''
+
+    # Check system
+    if platform.system().lower() == 'windows':
+        print("")
+        print("\tThe required software (FSL) is not installable on Windows platforms. Exiting.")
+        print("")
+        sys.exit(1)
+
+    # Check for external dependencies
+    if not shutil.which("fslmeants"):
+        print("")
+        print("\tThe required software (FSL) is not installed or on the system path. Exiting.")
+        print("")
+        sys.exit(1)
+
+    if not shutil.which("wb_command"):
+        print("")
+        print("\tThe required software (Connectome Workbench) is not installed or on the system path. Exiting.")
+        print("")
+        sys.exit(1)
+
+    # Argument parser
+    parser = argparse.ArgumentParser(description="Computes the Pearson correlation coefficient between two masks (one being a seed mask and the other being a statistics mask)."
+
+    # Parse Arguments
+    # Required Arguments
+    reqoptions = parser.add_argument_group('Required arguments')
+    reqoptions.add_argument('-i', '-in', '--input',
+                            type=str,
+                            dest="cii_file",
+                            metavar="CIFTI.dtseries.nii",
+                            required=True,
+                            help="CIFTI-2 dense timeseries file (e.g. subject's fMRI timeseries mapped to some surface).")
+    reqoptions.add_argument('-s', '-seed', '--seed-mask',
+                            type=str,
+                            dest="seed_mask",
+                            metavar="CIFTI.dscalar.nii",
+                            required=True,
+                            help="CIFTI-2 dense scalar file (used as a seed/mask in a previous analysis).")
+    reqoptions.add_argument('-a', '-stat', '--stat-mask',
+                            type=str,
+                            dest="stat_mask",
+                            metavar="CIFTI.dscalar.nii",
+                            required=True,
+                            help="CIFTI-2 dense scalar file (statistics file from a previous statistical analysis, to be thresholded).")
+    reqoptions.add_argument('-o', '-out', '--output-prefix',
+                            type=str,
+                            dest="out_prefix",
+                            metavar="CIFTI.dscalar.nii",
+                            required=True,
+                            help="CIFTI-2 dense scalar file (statistics file from a previous statistical analysis, to be thresholded).")
+
+    # Optional Arguments
+    optoptions = parser.add_argument_group('Optional arguments')
+    optoptions.add_argument('-t', '-thresh', '--thresh',
+                            type=float,
+                            dest="thresh",
+                            metavar="FLOAT",
+                            default=1.77,
+                            required=False,
+                            help="Cluster threshold. [default: 1.77]")
+    optoptions.add_argument('-l', '-log', '--log-file',
+                            type=str,
+                            dest="log_file",
+                            metavar="LOG",
+                            default="log_file.log",
+                            required=False,
+                            help="Log file name. [default: 'log_file.log']")
+    optoptions.add_argument('--debug',
+                            dest="debug",
+                            action="store_true",
+                            required=False,
+                            default=False,
+                            help="Enables printing of diagnostic messages. [default: 'disabled']")
+    optoptions.add_argument('--dry-run',
+                            dest="dryrun",
+                            action="store_true",
+                            required=False,
+                            default=False,
+                            help="Preforms dry-run (e.g. no files are created). [default: 'disabled']")
+    optoptions.add_argument('-v','--verbose',
+                            dest="verbose",
+                            action="store_true",
+                            required=False,
+                            default=False,
+                            help="Enables printing of verbose messages. [default: 'disabled']")
+    optoptions.add_argument('--keep-tmp',
+                            dest="keep_tmp",
+                            action="store_true",
+                            required=False,
+                            default=False,
+                            help="Keep temporary working directory. [default: 'disabled']")
+
+    args = parser.parse_args()
+
+    # Print help message in the case
+    # of no arguments
+    try:
+        args = parser.parse_args()
+    except SystemExit as err:
+        if err.code == 2:
+            parser.print_help()
+
+
+    [corr_coeff,text_file] = corr_comp(cii=args.cii_file,
+                                        seed_mask=args.seed_mask,
+                                        stat_mask=args.stat_mask,
+                                        out_prefix=args.out_prefix,
+                                        thresh=args.thresh,
+                                        log_file=args.log_file,
+                                        debug=args.debug,
+                                        dryrun=args.dryrun,
+                                        env=None,
+                                        stdout="",
+                                        shell=False,
+                                        verbose=args.verbose,
+                                        keep_tmp_dir=args.keep_tmp)
+
+if __name__ == "__main__":
+    main()
