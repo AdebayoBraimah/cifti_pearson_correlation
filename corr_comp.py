@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 '''
-working doc-string
+Python script with a collection of wrapper functions for FSL and Connectome Workbench binaries to perform timeseries extraction of
+CIFTI files and to compute the Pearson correlation between two ROIs.
 '''
 
 # Import packages/modules
